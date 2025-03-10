@@ -89,7 +89,7 @@ body {
   td input[type="number"] {
     width: 80%;
     padding: 10px;
-    font-size: 11px;
+    font-size: 15px;
     text-align: center;
   }
   /* 第一列只读输入框 */
@@ -158,6 +158,13 @@ body {
   #popupMenu ul li:hover {
     background-color: #f0f0f0;
   }
+
+  /* 占位区域 */
+  .footer-placeholder {
+    height: 100px;
+    width: 100%;
+  }
+
   
   /* 固定底部区域 */
   #bottomBar {
