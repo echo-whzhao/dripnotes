@@ -160,13 +160,6 @@ body {
     background-color: #f0f0f0;
   }
 
-  /* 占位区域 */
-  .footer-placeholder {
-    height: 100px;
-    width: 100%;
-  }
-
-  
   /* 固定底部区域 */
   #bottomBar {
     position: fixed;
