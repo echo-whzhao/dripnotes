@@ -2,72 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coffee Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Drip Notes</title>
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SF Pro Display - Apple System Font Alternative -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <!-- Handwriting Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased">
   <!-- 页面最上方的标题 -->
-  <header>
-    <h1>Coffee Timer</h1>
+  <header class="text-center py-4">
+    <h1 class="text-4xl font-bold text-gray-800 handwriting">
+      Drip Notes
+    </h1>
   </header>
   
   <!-- 白色半透明的内容面板 -->
   <div class="content-panel">
     <!-- Title 与 Remarks 部分 -->
     <div class="form-section">
-      <input type="text" id="recipeTitle" placeholder="Enter Title">
-      <textarea id="recipeRemarks" placeholder="Enter Notes"></textarea>
+      <input type="text" id="recipeTitle" class="title-input" placeholder="Enter Title">
+      <textarea id="recipeRemarks" class="remarks-input" placeholder="Enter Notes" rows="3"></textarea>
     </div>
     
     <!-- 表格部分 -->
     <div class="table-section">
-      <table id="recipeTable">
+      <table id="recipeTable" class="w-full">
         <thead>
-          <tr>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Water(g)</th>
-            <th></th>
+          <tr class="bg-gray-50">
+            <th class="text-center text-sm">Start Time</th>
+            <th class="text-center text-sm">End Time</th>
+            <th class="text-center text-sm">Water(g)</th>
+            <th class="text-center"></th>
           </tr>
         </thead>
         <tbody>
           <!-- 初始第一行 -->
           <tr>
-            <td><input type="time" value="00:00" readonly></td>
-            <td><input type="time" value="00:30"></td>
-            <td><input type="number" value="50"></td>
+            <td><input type="time" value="00:00" readonly class="time-input start-time"></td>
+            <td><input type="time" value="00:30" class="time-input end-time"></td>
+            <td><input type="number" value="50" class="number-input water-amount"></td>
             <td>
-              <button class="actionBtn" title="Actions">⋮</button>
+              <button class="actionBtn" title="Actions">
+                <i class="fas fa-ellipsis-vertical"></i>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
       <!-- 长方形 Add Row 按钮 -->
-      <button id="addRowBtn" class="add-row-btn">＋</button>
+      <button id="addRowBtn" class="add-row-btn">
+        <i class="fas fa-plus mr-2"></i>Add Step
+      </button>
     </div>
   </div>
   
   <!-- 行操作的弹出菜单 -->
-  <div id="popupMenu">
+  <div id="popupMenu" class="action-popup">
     <ul>
-      <li data-action="add">＋</li>
-      <li data-action="delete">－</li>
-      <li data-action="moveUp">↑</li>
-      <li data-action="moveDown">↓</li>
+      <li data-action="add"><i class="fas fa-plus mr-2"></i>Add</li>
+      <li data-action="delete"><i class="fas fa-trash mr-2"></i>Delete</li>
+      <li data-action="moveUp"><i class="fas fa-arrow-up mr-2"></i>Up</li>
+      <li data-action="moveDown"><i class="fas fa-arrow-down mr-2"></i>Down</li>
     </ul>
   </div>
   
   <!-- 固定底部区域 -->
-  <div id="bottomBar">
-    <button id="screenshotBtn" title="Save as Image">📷</button>
-    <button id="saveBtn" title="Save Recipe">💾</button>
-    <button id="loadBtn" title="Load Recipe">📂</button>
-    <button id="previewBtn" title="Preview Drip">▶</button>
+  <div id="bottomBar" class="bottom-actions">
+    <button id="screenshotBtn" title="Save as Image" class="action-button">
+      <i class="fas fa-camera"></i>
+    </button>
+    <button id="saveBtn" title="Save Recipe" class="action-button">
+      <i class="fas fa-save"></i>
+    </button>
+    <button id="loadBtn" title="Load Recipe" class="action-button">
+      <i class="fas fa-folder-open"></i>
+    </button>
+    <button id="previewBtn" title="Preview Drip" class="action-button primary">
+      <i class="fas fa-play"></i>
+    </button>
   </div>
   
   <!-- Modal 弹窗，用于加载 Recipe 列表 -->
-  <div id="recipeListModal">
+  <div id="recipeListModal" class="modal">
     <div class="modal-content"></div>
   </div>
   
