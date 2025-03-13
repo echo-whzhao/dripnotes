@@ -11,7 +11,7 @@
   <!-- SF Pro Display - Apple System Font Alternative -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   <!-- Handwriting Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
@@ -45,9 +45,9 @@
         <tbody>
           <!-- 初始第一行 -->
           <tr>
-            <td><input type="time" value="00:00" readonly class="time-input start-time"></td>
+            <td><input type="time" value="00:00" class="time-input start-time"></td>
             <td><input type="time" value="00:30" class="time-input end-time"></td>
-            <td><input type="number" value="50" class="number-input water-amount"></td>
+            <td><input type="number" inputmode="numeric" pattern="[0-9]*" value="50" class="number-input water-amount"></td>
             <td>
               <button class="actionBtn" title="Actions">
                 <i class="fas fa-ellipsis-vertical"></i>
