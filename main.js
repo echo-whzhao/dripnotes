@@ -268,9 +268,9 @@ loadBtn.addEventListener('click', function() {
 });
 
 // 预览功能
-previewBtn.addEventListener('click', function() {
-  showToast('Drip preview coming soon!', 'info');
-});
+// previewBtn.addEventListener('click', function() {
+//   showToast('Drip preview coming soon!', 'info');
+// });
 
 // 显示配方列表
 function showRecipeList() {

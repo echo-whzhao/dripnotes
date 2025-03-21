@@ -94,7 +94,73 @@
     <div class="modal-content"></div>
   </div>
   
+  <!-- 滴滤预览模式 -->
+  <div id="dripPreviewModal" class="modal preview-modal">
+    <div class="preview-container">
+      <!-- 预览页顶部 -->
+      <div class="preview-header">
+        <button id="closePreviewBtn" class="preview-close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 id="previewTitle" class="preview-title">Recipe Title</h2>
+      </div>
+      
+      <!-- 内容部分包装器 -->
+      <div class="preview-sections-wrapper">
+        <!-- 备注显示区域 -->
+        <div class="preview-section">
+          <div id="previewNotes" class="preview-notes">Recipe notes will appear here...</div>
+        </div>
+        
+        <!-- 主要内容区 -->
+        <div class="preview-content">
+          <!-- 步骤滚轮部分 -->
+          <div class="preview-section">
+            <div class="step-wheel-container">
+              <div id="stepWheel" class="step-wheel">
+                <!-- 步骤会通过JS动态添加 -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- 计时器和状态显示部分 -->
+          <div class="preview-section">
+            <div class="timer-container">
+              <div class="timer-display">
+                <div class="timer-time" id="timerDisplay">00:00</div>
+                <div class="timer-status">
+                  <div class="status-item">
+                    <span class="status-label">Current Water:</span>
+                    <span id="currentWaterAmount" class="status-value">0g</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="status-label">Target Water:</span>
+                    <span id="targetWaterAmount" class="status-value">0g</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 计时器控制按钮 -->
+              <div class="timer-controls">
+                <button id="startTimerBtn" class="timer-btn primary">
+                  <i class="fas fa-play mr-2"></i>Start
+                </button>
+                <button id="pauseTimerBtn" class="timer-btn" disabled>
+                  <i class="fas fa-pause mr-2"></i>Pause
+                </button>
+                <button id="resetTimerBtn" class="timer-btn">
+                  <i class="fas fa-undo mr-2"></i>Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <script src="main.js"></script>
+  <script src="preview.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/piexifjs"></script>
 </body>
