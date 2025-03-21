@@ -172,6 +172,12 @@ function updateStepWheel(currentSeconds) {
   let currentStepIndex = 0;
   let targetWater = 0;
   
+  // 确保有步骤数据
+  if (currentRecipeSteps.length === 0) {
+    return;
+  }
+  
+  // 遍历所有步骤找到当前应显示的步骤
   for (let i = 0; i < currentRecipeSteps.length; i++) {
     const step = currentRecipeSteps[i];
     
@@ -195,10 +201,11 @@ function updateStepWheel(currentSeconds) {
       // 如果超过了当前步骤的结束时间
       targetWater = step.water;
       
-      // 如果是最后一步且已经超时
+      // 只有当没有更后面的步骤时才设置为当前步骤
       if (i === currentRecipeSteps.length - 1) {
         currentStepIndex = i;
       }
+      // 否则继续检查下一步骤
     }
   }
   
@@ -209,7 +216,7 @@ function updateStepWheel(currentSeconds) {
   const stepCards = stepWheelEl.querySelectorAll('.step-card');
   
   // 安全检查：如果没有步骤卡片，不进行后续操作
-  if (stepCards.length === 0) {
+  if (stepCards.length <= 2) { // 至少要有2个占位卡片加1个实际卡片
     return;
   }
   
@@ -219,28 +226,31 @@ function updateStepWheel(currentSeconds) {
     card.classList.remove('current', 'prev', 'next');
   });
   
-  // 计算索引时确保不超出范围
-  const prevIndex = currentStepIndex > 0 ? currentStepIndex : 0; // 如果是第一步，使用占位卡片
-  const nextIndex = currentStepIndex + 2 < stepCards.length ? currentStepIndex + 2 : stepCards.length - 1;
+  // 获取实际卡片的索引（考虑占位卡片）
+  const currentCardIndex = currentStepIndex + 1; // +1 是因为第一个是占位卡片
   
-  // 安全检查：确保索引有效
-  if (currentStepIndex + 1 < stepCards.length) {
-    // 显示当前步骤（始终在中间）
-    stepCards[currentStepIndex + 1].style.display = 'block';
-    stepCards[currentStepIndex + 1].classList.add('current');
+  // 确保当前卡片索引有效
+  if (currentCardIndex >= stepCards.length - 1) {
+    // 如果索引超出范围（例如最后一步之后），使用最后一个实际卡片
+    currentStepIndex = stepCards.length - 3; // -3：减去两个占位符和1（转为索引）
   }
   
-  // 显示前一步（必然存在，在左边）
-  if (prevIndex < stepCards.length) {
-    stepCards[prevIndex].style.display = 'block';
-    stepCards[prevIndex].classList.add('prev');
-  }
+  // 重新计算索引
+  const currentIndex = currentStepIndex + 1;
+  const prevIndex = currentStepIndex > 0 ? currentStepIndex : 0;
+  const nextIndex = (currentStepIndex + 2 < stepCards.length) ? currentStepIndex + 2 : stepCards.length - 1;
   
-  // 显示后一步（必然存在，在右边）
-  if (nextIndex < stepCards.length) {
-    stepCards[nextIndex].style.display = 'block';
-    stepCards[nextIndex].classList.add('next');
-  }
+  // 显示当前步骤（始终在中间）
+  stepCards[currentIndex].style.display = 'block';
+  stepCards[currentIndex].classList.add('current');
+  
+  // 显示前一步
+  stepCards[prevIndex].style.display = 'block';
+  stepCards[prevIndex].classList.add('prev');
+  
+  // 显示后一步
+  stepCards[nextIndex].style.display = 'block';
+  stepCards[nextIndex].classList.add('next');
 }
 
 // 重置预览模式
