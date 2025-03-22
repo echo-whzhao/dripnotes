@@ -130,27 +130,86 @@ function createStepWheel() {
   placeholderStart.style.width = '32%';
   stepWheelEl.appendChild(placeholderStart);
 
-  // 创建所有实际步骤卡片
-  currentRecipeSteps.forEach((step, index) => {
+  // 创建所有实际步骤卡片和等待卡片
+  let allDisplaySteps = [];
+  
+  // 首先处理第一个步骤
+  if (currentRecipeSteps.length > 0) {
+    allDisplaySteps.push({
+      type: 'step',
+      index: 0,
+      data: currentRecipeSteps[0]
+    });
+  }
+  
+  // 处理后续步骤，检查间隔并添加等待卡片
+  for (let i = 1; i < currentRecipeSteps.length; i++) {
+    const prevStep = currentRecipeSteps[i-1];
+    const currentStep = currentRecipeSteps[i];
+    
+    // 检查是否存在时间间隔
+    if (prevStep.endSeconds < currentStep.startSeconds) {
+      // 添加等待卡片
+      allDisplaySteps.push({
+        type: 'wait',
+        startSeconds: prevStep.endSeconds,
+        endSeconds: currentStep.startSeconds,
+        startTime: prevStep.endTime,
+        endTime: currentStep.startTime
+      });
+    }
+    
+    // 添加当前步骤
+    allDisplaySteps.push({
+      type: 'step',
+      index: i,
+      data: currentStep
+    });
+  }
+  
+  // 创建所有卡片
+  allDisplaySteps.forEach((displayStep, displayIndex) => {
     const stepCard = document.createElement('div');
     stepCard.className = 'step-card';
-    stepCard.dataset.index = index;
+    stepCard.dataset.displayIndex = displayIndex;
+    
+    if (displayStep.type === 'step') {
+      // 实际步骤卡片
+      const step = displayStep.data;
+      stepCard.dataset.type = 'step';
+      stepCard.dataset.stepIndex = displayStep.index;
+      
+      stepCard.innerHTML = `
+        <div class="step-time">
+          <span class="step-time-value">${step.startTime}</span>
+          <span class="time-divider">→</span>
+          <span class="step-time-value">${step.endTime}</span>
+        </div>
+        <div class="step-water">${step.water.toFixed(1)}g</div>
+        <div class="step-label">Target Water</div>
+      `;
+    } else {
+      // 等待卡片
+      stepCard.dataset.type = 'wait';
+      stepCard.dataset.startSeconds = displayStep.startSeconds;
+      stepCard.dataset.endSeconds = displayStep.endSeconds;
+      
+      stepCard.innerHTML = `
+        <div class="step-time">
+          <span class="step-time-value">${displayStep.startTime}</span>
+          <span class="time-divider">→</span>
+          <span class="step-time-value">${displayStep.endTime}</span>
+        </div>
+        <div class="step-water wait-text">Wait</div>
+        <div class="step-label">  </div>
+      `;
+    }
     
     // 调整卡片样式，适应不同屏幕
     stepCard.style.flex = '0 0 auto';
     stepCard.style.width = '32%';
     stepCard.style.boxSizing = 'border-box';
     stepCard.style.display = 'none'; // 默认隐藏所有卡片
-    
-    stepCard.innerHTML = `
-      <div class="step-time">
-        <span class="step-time-value">${step.startTime}</span>
-        <span class="time-divider">→</span>
-        <span class="step-time-value">${step.endTime}</span>
-      </div>
-      <div class="step-water">${step.water.toFixed(1)}g</div>
-      <div class="step-label">Target Water</div>
-    `;
     
     stepWheelEl.appendChild(stepCard);
   });
@@ -162,52 +221,22 @@ function createStepWheel() {
   placeholderEnd.style.width = '32%';
   stepWheelEl.appendChild(placeholderEnd);
   
+  // 保存所有显示步骤信息
+  stepWheelEl.dataset.displayStepsCount = allDisplaySteps.length;
+  
   // 初始显示第一步
   updateStepWheel(0);
 }
 
 // 更新步骤滚轮显示
 function updateStepWheel(currentSeconds) {
-  // 查找当前应该显示哪一步
-  let currentStepIndex = 0;
-  let targetWater = 0;
-  
   // 确保有步骤数据
   if (currentRecipeSteps.length === 0) {
     return;
   }
   
-  // 遍历所有步骤找到当前应显示的步骤
-  for (let i = 0; i < currentRecipeSteps.length; i++) {
-    const step = currentRecipeSteps[i];
-    
-    if (currentSeconds >= step.startSeconds && currentSeconds <= step.endSeconds) {
-      currentStepIndex = i;
-      
-      // 计算当前应该到达的水量 - 使用更精确的计算
-      const stepDuration = step.endSeconds - step.startSeconds;
-      const stepProgress = (currentSeconds - step.startSeconds) / stepDuration;
-      const stepWaterChange = step.waterChange;
-      
-      // 如果是第一步，直接根据进度计算；否则，加上上一步的水量
-      if (i === 0) {
-        targetWater = calculateWater(stepProgress * step.water);
-      } else {
-        targetWater = calculateWater(currentRecipeSteps[i-1].water + (stepProgress * stepWaterChange));
-      }
-      
-      break;
-    } else if (currentSeconds > step.endSeconds) {
-      // 如果超过了当前步骤的结束时间
-      targetWater = step.water;
-      
-      // 只有当没有更后面的步骤时才设置为当前步骤
-      if (i === currentRecipeSteps.length - 1) {
-        currentStepIndex = i;
-      }
-      // 否则继续检查下一步骤
-    }
-  }
+  // 获取当前应该显示的步骤索引和水量
+  let { displayStepIndex, targetWater } = findCurrentDisplayStep(currentSeconds);
   
   // 更新当前水量显示 - 保留一位小数
   currentWaterEl.textContent = `${targetWater.toFixed(1)}g`;
@@ -226,19 +255,18 @@ function updateStepWheel(currentSeconds) {
     card.classList.remove('current', 'prev', 'next');
   });
   
-  // 获取实际卡片的索引（考虑占位卡片）
-  const currentCardIndex = currentStepIndex + 1; // +1 是因为第一个是占位卡片
+  // 计算显示卡片的索引
+  const displayCount = parseInt(stepWheelEl.dataset.displayStepsCount || '0');
   
-  // 确保当前卡片索引有效
-  if (currentCardIndex >= stepCards.length - 1) {
-    // 如果索引超出范围（例如最后一步之后），使用最后一个实际卡片
-    currentStepIndex = stepCards.length - 3; // -3：减去两个占位符和1（转为索引）
+  // 范围检查
+  if (displayStepIndex >= displayCount) {
+    displayStepIndex = displayCount - 1;
   }
   
-  // 重新计算索引
-  const currentIndex = currentStepIndex + 1;
-  const prevIndex = currentStepIndex > 0 ? currentStepIndex : 0;
-  const nextIndex = (currentStepIndex + 2 < stepCards.length) ? currentStepIndex + 2 : stepCards.length - 1;
+  // 计算实际DOM中的索引（加1因为第一个是占位卡片）
+  const currentIndex = displayStepIndex + 1;
+  const prevIndex = displayStepIndex > 0 ? displayStepIndex : 0;
+  const nextIndex = (displayStepIndex + 2 < stepCards.length) ? displayStepIndex + 2 : stepCards.length - 1;
   
   // 显示当前步骤（始终在中间）
   stepCards[currentIndex].style.display = 'block';
@@ -251,6 +279,102 @@ function updateStepWheel(currentSeconds) {
   // 显示后一步
   stepCards[nextIndex].style.display = 'block';
   stepCards[nextIndex].classList.add('next');
+}
+
+// 查找当前应显示的步骤
+function findCurrentDisplayStep(currentSeconds) {
+  let displayStepIndex = 0;
+  let targetWater = 0;
+  let currentStepFound = false;
+  
+  // 获取所有步骤卡片（排除占位卡片）
+  const stepCards = Array.from(stepWheelEl.querySelectorAll('.step-card:not(.placeholder)'));
+  
+  // 遍历所有卡片找到当前应显示的卡片
+  for (let i = 0; i < stepCards.length; i++) {
+    const card = stepCards[i];
+    const cardType = card.dataset.type;
+    
+    if (cardType === 'step') {
+      // 实际步骤卡片
+      const stepIndex = parseInt(card.dataset.stepIndex);
+      const step = currentRecipeSteps[stepIndex];
+      
+      if (currentSeconds >= step.startSeconds && currentSeconds <= step.endSeconds) {
+        displayStepIndex = i;
+        currentStepFound = true;
+        
+        // 计算当前应该到达的水量
+        const stepDuration = step.endSeconds - step.startSeconds;
+        const stepProgress = (currentSeconds - step.startSeconds) / stepDuration;
+        const stepWaterChange = step.waterChange;
+        
+        // 如果是第一步，直接根据进度计算；否则，加上上一步的水量
+        if (stepIndex === 0) {
+          targetWater = calculateWater(stepProgress * step.water);
+        } else {
+          targetWater = calculateWater(currentRecipeSteps[stepIndex-1].water + (stepProgress * stepWaterChange));
+        }
+        
+        break;
+      } else if (currentSeconds > step.endSeconds) {
+        // 如果超过了当前步骤的结束时间，记录水量
+        targetWater = step.water;
+        
+        // 如果是最后一个步骤且已超时
+        if (i === stepCards.length - 1) {
+          displayStepIndex = i;
+          currentStepFound = true;
+          break;
+        }
+      } else if (currentSeconds < step.startSeconds) {
+        // 如果还没到当前步骤的开始时间
+        displayStepIndex = i;
+        // 保持上一步的水量
+        break;
+      }
+    } else if (cardType === 'wait') {
+      // 等待卡片
+      const startSeconds = parseFloat(card.dataset.startSeconds);
+      const endSeconds = parseFloat(card.dataset.endSeconds);
+      
+      if (currentSeconds >= startSeconds && currentSeconds <= endSeconds) {
+        displayStepIndex = i;
+        currentStepFound = true;
+        // 水量保持上一步骤的水量
+        break;
+      }
+    }
+  }
+  
+  // 如果没有找到匹配的步骤，尝试确定最接近的
+  if (!currentStepFound) {
+    // 遍历所有步骤，找到第一个开始时间大于当前时间的步骤
+    for (let i = 0; i < currentRecipeSteps.length; i++) {
+      if (currentRecipeSteps[i].startSeconds > currentSeconds) {
+        // 如果当前时间小于第一个步骤的开始时间，使用第一个步骤
+        if (i === 0) {
+          displayStepIndex = 0;
+        } else {
+          // 否则使用上一个步骤并设置其水量
+          const prevStepIndex = i - 1;
+          targetWater = currentRecipeSteps[prevStepIndex].water;
+          
+          // 找到对应的显示索引
+          for (let j = 0; j < stepCards.length; j++) {
+            const card = stepCards[j];
+            if (card.dataset.type === 'step' && parseInt(card.dataset.stepIndex) === prevStepIndex) {
+              displayStepIndex = j;
+              break;
+            }
+          }
+        }
+        break;
+      }
+    }
+  }
+  
+  return { displayStepIndex, targetWater };
 }
 
 // 重置预览模式

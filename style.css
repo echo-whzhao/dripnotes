@@ -693,6 +693,18 @@
     margin-top: 0px;
   }
   
+  .step-card .wait-text {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-light);
+    margin: 4px 0;
+  }
+  
+  .step-card.current .wait-text {
+    color: var(--text-normal);
+  }
+  
   /* 计时器区域 */
   .timer-container {
     background-color: var(--background-color);
