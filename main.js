@@ -281,6 +281,13 @@ function showRecipeList() {
   titleElem.innerText = "Select a Recipe to Load";
   modalContent.appendChild(titleElem);
   
+  // 创建滚动容器
+  var scrollContainer = document.createElement("div");
+  scrollContainer.style.maxHeight = "40vh"; // 设置最大高度为视口高度的60%
+  scrollContainer.style.overflowY = "auto"; // 添加垂直滚动条
+  scrollContainer.style.marginBottom = "16px"; // 添加底部间距
+  modalContent.appendChild(scrollContainer);
+  
   // 加载所有保存的配方
   var recipesStr = localStorage.getItem("coffeeTimerRecipes");
   var recipeCount = 0;
@@ -328,7 +335,7 @@ function showRecipeList() {
       
       container.appendChild(loadBtn);
       container.appendChild(deleteBtn);
-      modalContent.appendChild(container);
+      scrollContainer.appendChild(container); // 将配方项添加到滚动容器中
     });
   }
   
@@ -338,7 +345,7 @@ function showRecipeList() {
     noRecipesMsg.textContent = "No saved recipes found";
     noRecipesMsg.style.textAlign = "center";
     noRecipesMsg.style.color = "var(--text-secondary)";
-    modalContent.appendChild(noRecipesMsg);
+    scrollContainer.appendChild(noRecipesMsg); // 将提示信息添加到滚动容器中
   }
   
   // 导入按钮
